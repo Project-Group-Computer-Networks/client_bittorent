@@ -1,1 +1,1 @@
-# client_nayan
+# Client implementation of BitTorrent
