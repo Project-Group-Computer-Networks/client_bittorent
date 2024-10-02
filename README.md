@@ -1,1 +1,1 @@
-# BitTorrent_client
+# Client implementation of BitTorrent
