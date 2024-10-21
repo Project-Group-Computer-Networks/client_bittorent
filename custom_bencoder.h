@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CUSTOM_BENCODER_H
+#define CUSTOM_BENCODER_H
 
 #include <iostream>
 #include <string>
@@ -339,3 +340,5 @@ namespace bencoding
         return ptr_;
     }
 }
+
+#endif
