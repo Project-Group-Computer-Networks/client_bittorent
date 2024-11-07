@@ -20,10 +20,12 @@ std::string peer_id_str = "0MjRoxR3KuzXecjOVAF2"; // Example peer ID
 uint64_t CONNECTION_ID = 0x41727101980LL;         // Example connection ID
 uint32_t TRANSACTION_ID = rand();                 // Generate a random transaction ID
 uint32_t ACTION_ANNOUNCE = 1;
+const char *ip_addr;
 
 void decode_torrent_file()
 {
-    ifstream file("sample.torrent", ios::binary);
+
+    ifstream file("puppy.torrent", ios::binary);
     if (!file)
     {
         cerr << "Error opening .torrent file!" << endl;
@@ -58,7 +60,25 @@ void decode_torrent_file()
 
     uploaded = htonll(0);
     struct in_addr addr;
-    const char ip_addr[] = "0.0.0.0";
+
+    // std::string url_string = torrent_dict["announce"]->get_as_str();
+    // ip_addr = url_string.c_str();
+    // ip_addr = "170.178.183.18";
+
+    // std::string url_string = torrent_dict["announce"]->get_as_str();
+    std::string url_string = "http://torrent.ubuntu.com";
+    // Remove the protocol (e.g., "udp://")
+    // std::string hostname = url_string.substr(url_string.find("://") + 3);
+    std::string hostname = url_string;
+    // Optionally, find the first slash '/' and cut off the path
+    // size_t path_pos = hostname.find(':');
+    // if (path_pos != std::string::npos)
+    // {
+        // hostname = hostname.substr(0, path_pos);
+    // }
+
+    ip_addr = hostname.c_str(); // Now ip_addr contains only the hostname
+    std::cout<<ip_addr<<endl;
     inet_aton(ip_addr, &addr); // Default (0) to let the tracker detect
     ip_address = htonl(addr.s_addr);
     event = htonl(0);
@@ -92,7 +112,7 @@ int main()
     hints.ai_family = AF_INET;      // Use IPv4
     hints.ai_socktype = SOCK_DGRAM; // UDP
 
-    if ((rv = getaddrinfo("0.0.0.0", TRACKER_PORT, &hints, &servinfo)) != 0)
+    if ((rv = getaddrinfo(ip_addr, TRACKER_PORT, &hints, &servinfo)) != 0)
     {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
