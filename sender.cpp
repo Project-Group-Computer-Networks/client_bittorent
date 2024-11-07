@@ -1,18 +1,63 @@
 #include <iostream>
 #include <cstring>
-#include <string>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
-// Handshake Constants
 const std::string PROTOCOL_NAME = "BitTorrent protocol";
 const int RESERVED_BYTES = 8;
 const int HANDSHAKE_SIZE = 49 + PROTOCOL_NAME.size();
+const int MESSAGE_ID_INTERESTED = 2;
+const int MESSAGE_ID_UNCHOKE = 1;
+const int MESSAGE_ID_REQUEST = 6;
+const int MESSAGE_ID_PIECE = 7;
 
-// Replace with actual info hash and peer ID
-std::string infoHash = "<20-byte-info-hash00>";
-std::string peerID = "<20-byte-peer-id00000>";
+std::string infoHash = "<20-byte-info-hash0>";
+std::string peerID = "<20-byte-peer-id000>";
+
+bool sendInterestedMessage(int sock) {
+    uint32_t messageLength = htonl(1); // 1 byte for the message ID
+    uint8_t messageID = MESSAGE_ID_INTERESTED;
+
+    char buffer[5];
+    memcpy(buffer, &messageLength, 4); // Length prefix
+    buffer[4] = messageID;
+
+    if (send(sock, buffer, 5, 0) < 0) {
+        std::cerr << "Failed to send interested message\n";
+        return false;
+    }
+    std::cout << "Interested message sent\n";
+    return true;
+}
+
+bool receiveUnchokeMessage(int sock) {
+    uint32_t lengthPrefix;
+    if (recv(sock, &lengthPrefix, sizeof(lengthPrefix), 0) <= 0) {
+        std::cerr << "Failed to receive message length\n";
+        return false;
+    }
+    lengthPrefix = ntohl(lengthPrefix);
+
+    if (lengthPrefix != 1) {
+        std::cerr << "Unexpected message length\n";
+        return false;
+    }
+
+    uint8_t messageID;
+    if (recv(sock, &messageID, sizeof(messageID), 0) <= 0) {
+        std::cerr << "Failed to receive message ID\n";
+        return false;
+    }
+
+    if (messageID == MESSAGE_ID_UNCHOKE) {
+        std::cout << "Received unchoke message from peer\n";
+        return true;
+    } else {
+        std::cerr << "Received unexpected message ID: " << (int)messageID << "\n";
+        return false;
+    }
+}
 
 bool connectToPeer(const std::string& ip, int port) {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -37,22 +82,23 @@ bool connectToPeer(const std::string& ip, int port) {
         return false;
     }
 
-    // Construct the handshake message
+    // Construct handshake
     std::string handshakeMessage;
-    handshakeMessage += static_cast<char>(PROTOCOL_NAME.size()); // protocol length byte
+    handshakeMessage += static_cast<char>(PROTOCOL_NAME.size());
     handshakeMessage += PROTOCOL_NAME;
-    handshakeMessage += std::string(RESERVED_BYTES, '\0'); // reserved bytes
+    handshakeMessage += std::string(RESERVED_BYTES, '\0');
     handshakeMessage += infoHash;
     handshakeMessage += peerID;
 
-    // Send the handshake message
+    // Send handshake message
     if (send(sock, handshakeMessage.c_str(), handshakeMessage.size(), 0) < 0) {
         std::cerr << "Failed to send handshake\n";
         close(sock);
         return false;
     }
+    std::cout << "Handshake sent\n";
 
-    // Receive handshake response (should be the same length as sent)
+    // Receive handshake response
     char response[HANDSHAKE_SIZE];
     int bytesReceived = recv(sock, response, HANDSHAKE_SIZE, 0);
     if (bytesReceived != HANDSHAKE_SIZE) {
@@ -60,21 +106,32 @@ bool connectToPeer(const std::string& ip, int port) {
         close(sock);
         return false;
     }
-
     std::cout << "Handshake successful with peer!\n";
+
+    // Send interested message
+    if (sendInterestedMessage(sock)) {
+        std::cout << "Client sent interested message successfully.\n";
+    }
+
+    // Wait for unchoke message
+    if (receiveUnchokeMessage(sock)) {
+        std::cout << "Unchoke message received, ready to request pieces.\n";
+    } else {
+        std::cerr << "Did not receive unchoke message\n";
+    }
 
     close(sock);
     return true;
 }
 
 int main() {
-    std::string peerIP = "0.0.0.0"; // Replace with actual peer IP
-    int peerPort = 6881;              // Replace with actual peer port
+    std::string peerIP = "127.0.0.1";
+    int peerPort = 6881;
 
     if (connectToPeer(peerIP, peerPort)) {
-        std::cout << "Connected and handshaked with peer.\n";
+        std::cout << "Connected and interacted with peer.\n";
     } else {
-        std::cout << "Failed to connect to peer.\n";
+        std::cerr << "Failed to connect to peer.\n";
     }
 
     return 0;
