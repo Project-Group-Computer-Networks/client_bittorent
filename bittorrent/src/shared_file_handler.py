@@ -3,7 +3,6 @@ from threading import *
 
 """
     General file input and output class, provides read and write data options
-    However note that default mode of operations on file in read/write both
 """
 class file_io():
     # initializes the file descripter
@@ -43,9 +42,8 @@ class file_io():
 """
     The peers use this class object to write pieces downloaded into file in 
     any order resulting into forming of orignal file using Bittorrent's 
-    P2P architecture. Simply class helps in writing/reading pieces in file 
+    P2P architecture. 
 """
-# TODO : case of multiple torrent files initialization needs to be handled
 class torrent_shared_file_handler():
     
     # initialize the class with torrent and path where file needs to be downloaded
@@ -53,36 +51,21 @@ class torrent_shared_file_handler():
         self.download_file_path = download_file_path
         self.torrent = torrent
         
-        # file size in bytes
         self.file_size = torrent.torrent_metadata.file_size
-        # piece size in bytes of torrent file data
         self.piece_size = torrent.torrent_metadata.piece_length
-
-        # initlizes the file input/output object instance 
         self.download_file = file_io(self.download_file_path)
         
         # shared file lock
         self.shared_file_lock = Lock()
     
-    # initialize the file before downloading 
-    # function writes all null values in the file 
     def initialize_for_download(self):
-        # initialize the file with all the null values 
         self.download_file.write_null_values(self.file_size)
    
-
-    # calculates the position index in file given piece index and block offset
     def calculate_file_position(self, piece_index, block_offset):
         return piece_index * self.piece_size + block_offset
    
-
-    # initialize the file descriptor given the piece index and block offset
     def initalize_file_descriptor(self, piece_index, block_offset):
-        
-        # calulcate the position in file using piece index and offset
         file_descriptor_position = self.calculate_file_position(piece_index, block_offset)
-
-        # move the file descripter to the desired location 
         self.download_file.move_descriptor_position(file_descriptor_position)
 
 
@@ -124,6 +107,3 @@ class torrent_shared_file_handler():
         
         # return the read block of data
         return data_block
-    
-
-

@@ -12,14 +12,9 @@ from torrent_logger import *
     Implementation of Peer Wire Protocol as mentioned in RFC of BTP/1.0
     PWP will help in contacting the list of peers requesting them chucks 
     of file data. The swarm class implements various algorithms like piece
-    downloading stratergy, chocking and unchocking the peers, etc.
+    downloading stratergy, choking and unchoking the peers, etc.
 """
 
-"""
-    maintaing the state for all the peers participating in the torrent forming 
-    a dense network oftenly called as swarm. The swarm class helps in keeping
-    track of all the global information about the torrent
-"""
 class swarm():
 
     def __init__(self, peers_data, torrent):
@@ -68,10 +63,6 @@ class swarm():
         # swarm lock for required for updating the global state
         self.swarm_lock = Lock()
 
-    """
-        Updates bitfield count values obtained from peers in swarm
-        global state of count of different pieces available in swarm
-    """
     def update_bitfield_count(self, bitfield_pieces):
         for piece in bitfield_pieces:
             if piece in self.bitfield_pieces_count.keys():
@@ -79,20 +70,11 @@ class swarm():
             else:
                 self.bitfield_pieces_count[piece] = 1
  
-    """
-        The peer class must handle the downloaded file writing and reading 
-        thus peer class must have the file handler for this purpose.
-        function helps in making the share copy of handler available to peers
-    """
     def add_shared_file_handler(self, file_handler):
-        # instantiate the torrent shared file handler class object
         self.file_handler = file_handler
         for peer in self.peers_list:
             peer.add_file_handler(self.file_handler)
     
-    """
-        functions checks if the file handler has been added or not
-    """
     def have_file_handler(self):
         if self.file_handler is None:
             download_log  = 'Cannot download file : '
@@ -117,18 +99,12 @@ class swarm():
         # used for EXCECUTION LOGGING
         self.swarm_logger.log(self.peers_list[peer_index].get_handshake_log())
     
-    """
-        function checks if there are any active connections in swarm
-    """
     def have_active_connections(self):
         for peer in self.peers_list:
             if peer.peer_sock.peer_connection_active():
                 return True
         return False
       
-    """
-        function checks if the download is completed or not
-    """
     def download_complete(self):
         return len(self.bitfield_pieces_downloaded) == self.torrent.pieces_count
    
@@ -172,7 +148,6 @@ class swarm():
                 downloading_thread.join()
         self.download_end_time = time.time()
         
-        # used for EXCECUTION LOGGING
         download_log  = 'File downloading time : '
         download_log += str(timedelta(seconds=(self.download_end_time - self.download_start_time))) 
         download_log += ' Average download rate : ' 
@@ -182,7 +157,7 @@ class swarm():
 
     """
         function downloads piece given the peer index and updates the 
-        of downloaded pieces from the peers in swarm
+        bitfield of downloaded pieces from the peers in swarm
     """
     def download_piece(self, piece, peer_index):
         start_time = time.time()
@@ -203,11 +178,7 @@ class swarm():
             # release the lock after downloading
             self.swarm_lock.release() 
 
-    """
-        piece selection stratergy is completely based on the bittorrent client
-        most used piece selection stratergies are random piece selection stratergy
-        and rarest first piece selection startergy
-    """
+
     def piece_selection_startergy(self):
         return self.rarest_pieces_first()
 
@@ -235,9 +206,6 @@ class swarm():
         function returns the peer index from the list of peers in swarm
     """
     def peer_selection_startergy(self):
-        # used for AWS Cloud test
-        if self.torrent.client_request['AWS']:
-            return [self.select_specific_peer()]
         # select random peers untill you have some pieces
         if len(self.bitfield_pieces_downloaded) < self.minimum_pieces:
             return self.select_random_peers()

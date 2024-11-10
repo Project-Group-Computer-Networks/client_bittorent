@@ -1,9 +1,0 @@
-Thread-1 (connect_to_peer) - DEBUG - peer(185.125.190.59 : 6906) 
-SEND CONNECTION STATUS : (185.125.190.59 : 6906) ✅
-
-Thread-1 (connect_to_peer) - DEBUG - peer(185.125.190.59 : 6906) 
-Handshake initiated -----> (185.125.190.59 : 6906)
-
-Thread-1 (connect_to_peer) - DEBUG - peer(185.125.190.59 : 6906) 
-Handshake not recived from (185.125.190.59 : 6906)
-

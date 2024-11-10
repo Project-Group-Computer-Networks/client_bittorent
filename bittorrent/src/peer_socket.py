@@ -1,3 +1,5 @@
+# peer_socker.py handles socket connections with peers
+
 from socket import *
 from select import *
 from threading import *
@@ -5,26 +7,15 @@ from torrent_error import *
 from torrent_logger import *
 import sys
 
-"""
-    module handles the creating the socket for peers, and operations that
-    peer socket can peform
-
-    Note that all the current socket operations written are blocking 
-"""
-
-# class for general peer socket 
 class peer_socket():
 
     def __init__(self, peer_IP, peer_port, psocket = None):
         if psocket is None:
             # initializing a peer socket for TCP communiction 
             self.peer_sock = socket(AF_INET, SOCK_STREAM)
-            # peer connection
             self.peer_connection = False
         else:
-            # peer connection
             self.peer_connection = True
-            # initializing using the constructor argument socket
             self.peer_sock = psocket
         
         self.timeout = 3
@@ -41,14 +32,7 @@ class peer_socket():
         # socket locks for synchronization 
         self.socket_lock = Lock()
         
-        # logger for peer socket
-        self.socket_logger = torrent_logger(self.unique_id, SOCKET_LOG_FILE, DEBUG)
-        
 
-    """
-        function returns raw data of given data size which is recieved 
-        function returns the exact length data as recieved else return None
-    """
     def recieve_data(self, data_size):
         if not self.peer_connection:
             return 
@@ -69,14 +53,11 @@ class peer_socket():
             request_size -=  len(chunk)
             recieved_data_length += len(chunk)
 
-        # return required size data recieved from peer
         return peer_raw_data 
    
-    """
-        function helps send raw data by the socket
-        function sends the complete message, returns success/failure depending
-        upon if it has successfully send the data
-    """
+    
+    # returns true/false depending on whether it was successful in
+    # sending the data
     def send_data(self, raw_data):
         if not self.peer_connection:
             return False
@@ -86,40 +67,29 @@ class peer_socket():
                 # attempting to send data 
                 data_length_send += self.peer_sock.send(raw_data[data_length_send:])
             except:
-                # the TCP connection is broken
                 return False
         return True
 
-    """
-        binds the socket that IP and port and starts listening over it
-    """
+    
+    # binding the client to its port
     def start_seeding(self):
         try:
             self.peer_sock.bind((self.IP, self.port))
             self.peer_sock.listen(self.max_peer_requests)
         except Exception as err:
-            binding_log = 'Seeding socket binding failed ! ' + self.unique_id + ' : '
-            self.socket_logger.log(binding_log + err.__str__())
             sys.exit(0)
 
-    """
-        attempts to connect the peer using TCP connection 
-    """
+    # attempts to connect the peer using TCP connection 
     def request_connection(self):
         try:
             self.peer_sock.connect((self.IP, self.port))
             self.peer_connection = True
         except Exception as err:
             self.peer_connection = False
-            connection_log = 'Socket connection failed for ' + self.unique_id + ' : '
-            self.socket_logger.log(connection_log + err.__str__())
         return self.peer_connection
 
 
-    """
-        accepts an incomming connection
-        return connection socket and ip address of incoming connection
-    """
+    # accepts an incomming connection
     def accept_connection(self):
         connection_log = ''
         try:
@@ -129,26 +99,15 @@ class peer_socket():
             connection = None
             connection_log = 'Socket accept connection for seeder ' + self.unique_id + ' : ' 
             connection_log += str(err)
-        self.socket_logger.log(connection_log)
-        # successfully return connection
+
         return connection
 
-    """
-        checks if the peer connection is active or not
-    """
     def peer_connection_active(self):
         return self.peer_connection
 
-    """
-        disconnects the socket
-    """
     def disconnect(self):
         self.peer_sock.close() 
         self.peer_connection = False
        
-    """
-        context manager for exit
-    """
     def __exit__(self):
         self.disconnect()
-
