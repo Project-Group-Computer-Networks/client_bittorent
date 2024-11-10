@@ -1,4 +1,4 @@
-# peer_socker.py handles socket connections with peers
+# peer_socket.py handles socket connections with peers
 
 from socket import *
 from select import *

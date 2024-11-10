@@ -34,9 +34,8 @@ MESSAGE_LENGTH_SIZE     = 4
 MESSAGE_ID_SIZE         = 1
 
 
-# class for general peer message exchange in P2P bittorrent
+# class for general peer message part of peer wire protocol
 class peer_wire_message():
-    
     def __init__(self, message_length, message_id, payload):
         self.message_length = message_length
         self.message_id     = message_id 
@@ -44,12 +43,9 @@ class peer_wire_message():
 
     # returns raw bytes as peer message
     def message(self):
-        # pack the message length
         message  = struct.pack("!I", self.message_length)
-        # pack the message ID if present in message
         if self.message_id != None:
             message += struct.pack("!B", self.message_id)
-        # pack the paylaod is specified 
         if self.payload != None:
             message += self.payload
         return message
