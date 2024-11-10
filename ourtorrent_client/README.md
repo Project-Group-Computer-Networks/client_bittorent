@@ -1,5 +1,7 @@
 # OurTorrent
 
+OurTorrent is our attempt at developing a bittorrent client, which enables users to download files over internet in a P2P manner.
+
 ## Installation and Build :hammer_and_wrench:
 
 * Clone is repository on your local unix machine and step in the main directory
