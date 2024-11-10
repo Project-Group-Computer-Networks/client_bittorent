@@ -4,41 +4,29 @@ OurTorrent is our attempt at developing a bittorrent client, which enables users
 
 ## Installation and Build :hammer_and_wrench:
 
-* Clone is repository on your local unix machine and step in the main directory
+* Clone this repository on an Ubuntu machine and move to the working directory
 ```
-    $ git clone https://github.com/kishanpatel22/bittorrent.git
-    $ cd bittorrent
-```
-
-* If you don't have pipenv package then install it using command, else ignore below command
-```
-    $ pip3 install pipenv
+    $ git clone https://github.com/Project-Group-Computer-Networks/client_bittorent.git
+    $ cd ourtorrent_client
 ```
 
-* Enter the virtual enviornment and install all dependencies 
+* Donwload all the pre-requisites present in requirements.txt 
 ```
-    $ pipenv shell
-    $ pipenv install --dev
+    $ pip install -r requirements.txt
 ```
 
 ## Run :computer:
 
-* Change directory to source in bittorrent folder and inorder to display help options 
+* Change directory to src and run the help command
 ```
     $ cd src
     $ python3 main.py --help
 ```
 
-* Example for downloading torrent file given destination path for downloading file
+* To test the code, run the client with a torrent file present in examples folder
 ```
-    $ python3 main.py input_file.torrent -d destination_path/
+    $ python3 main.py -d ../ ../examples/ubuntu.torrent
 ```
-
-* Example for seeding torrent file given given destination path of existing file
-```
-    $ python3 main.py input_file.torrent -s existing_file_path/
-```
-
 
 ## Motivation 
 
