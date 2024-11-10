@@ -27,3 +27,28 @@ OurTorrent is our attempt at developing a bittorrent client, which enables users
 ```
     $ python3 main.py -d ../ ../examples/ubuntu.torrent
 ```
+
+## Directory Structure
+```
+-  OurTorrent_client
+    -  examples
+        -  ubuntu.torrent
+    -  src
+        -  logs
+        -  client.py
+        -  main.py
+        -  peer.py
+        -  peer_manager.py
+        -  peer_network.py
+        -  peer_socket.py
+        -  peer_state.py
+        -  shared_file_handler.py
+        -  torrent_error.py
+        -  torrent_logger.py
+        -  torrent_parser.py
+        -  torrent_sharing.py
+        -  torrent_stats.py
+        -  tracker_communication.py
+    -  readme.md
+    -  requirements.txt
+```
